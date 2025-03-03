@@ -1,241 +1,792 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSS Grid Maze</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column; /* Stack controls below the maze */
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #121212;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        #maze-container {
-            display: grid;
-            grid-template-columns: repeat(10, 30px);
-            grid-template-rows: repeat(10, 30px);
-            border: 4px solid #4CAF50;
-            box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
-            background-color: #222;
-        }
-
-        .cell {
-            width: 30px;
-            height: 30px;
-            box-sizing: border-box;
-            background-color: #222;
-        }
-
-        .wall-top { border-top: 2px solid #4CAF50; }
-        .wall-right { border-right: 2px solid #4CAF50; }
-        .wall-bottom { border-bottom: 2px solid #4CAF50; }
-        .wall-left { border-left: 2px solid #4CAF50; }
-
-        .player {
-            background-color: #f44336;
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(244, 67, 54, 0.7);
-            transition: transform 0.1s ease-out;
-            /* z-index: 2; */ /* Ensure player is on top */
-        }
-
-        .visited { background-color: #2a2a2a; }
-        .end {
-            background-color: #FFD700;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-        }
-
-        #controls {
-            margin-top: 20px;
-            text-align: center;
-            color: white;
-        }
-        #controls button { margin: 5px; }
-
-        #message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 2em;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px #000000;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 10px;
-            display: none;
-            z-index: 10;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Emoji Home Designer</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background-color: #f9f4f9;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .sidebar {
+      width: 100px;
+      background-color: #d8cef6;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+    .sidebar-left {
+      border-right: 4px dotted #b19cd9;
+    }
+    .sidebar-right {
+      border-left: 4px dotted #b19cd9;
+    }
+    .sidebar-title {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #6d5895;
+      text-align: center;
+      font-weight: bold;
+      text-shadow: 1px 1px 0px white;
+    }
+    .sidebar-section {
+      margin-bottom: 15px;
+      width: 100%;
+    }
+    .section-title {
+      font-size: 12px;
+      color: #6d5895;
+      margin-bottom: 5px;
+      text-align: center;
+      border-bottom: 2px dashed #b19cd9;
+      padding-bottom: 3px;
+    }
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      width: 100%;
+    }
+    .emoji-item {
+      font-size: 24px;
+      text-align: center;
+      cursor: grab;
+      transition: transform 0.2s, background-color 0.2s;
+      padding: 5px;
+      border-radius: 8px;
+      user-select: none;
+    }
+    .emoji-item:hover {
+      background-color: #e9e1fa;
+      transform: scale(1.1);
+    }
+    .emoji-tooltip {
+      position: absolute;
+      background-color: #faf5ff;
+      border: 2px solid #d8cef6;
+      border-radius: 8px;
+      padding: 5px;
+      font-size: 10px;
+      color: #6d5895;
+      pointer-events: none;
+      z-index: 100;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .emoji-item:hover + .emoji-tooltip {
+      opacity: 1;
+    }
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      background-color: #faf5ff;
+      overflow-y: auto;
+    }
+    .header {
+      margin-bottom: 10px;
+      text-align: center;
+      width: 100%;
+    }
+    .title {
+      font-size: 20px;
+      color: #6d5895;
+      margin-bottom: 5px;
+      text-shadow: 1px 1px 0px white;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #9d8bc0;
+      margin-bottom: 10px;
+    }
+    .layout-options {
+      margin-bottom: 10px;
+    }
+    .layout-options label {
+      font-size: 12px;
+      color: #6d5895;
+      margin-right: 5px;
+      text-shadow: 1px 1px 0px white;
+    }
+    .layout-options select {
+      padding: 4px;
+      border-radius: 4px;
+      border: 1px solid #b19cd9;
+      font-size: 12px;
+      margin-right: 5px;
+    }
+    .layout-options button {
+      padding: 4px 10px;
+      background-color: #c8b6e2;
+      border: none;
+      border-radius: 20px;
+      color: #6d5895;
+      cursor: pointer;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      font-size: 12px;
+      transition: all 0.2s;
+      box-shadow: 0 3px 5px rgba(109, 88, 149, 0.2);
+    }
+    .layout-options button:hover {
+      background-color: #b19cd9;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 8px rgba(109, 88, 149, 0.3);
+    }
+    .design-grid-container {
+      width: 400px;
+      height: 400px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      border: 4px solid #d8cef6;
+      border-radius: 12px;
+      background-color: white;
+      box-shadow: 0 5px 15px rgba(177, 156, 217, 0.3);
+    }
+    .design-grid {
+      width: 400px;
+      height: 400px;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(10, 1fr);
+      position: relative;
+      z-index: 5;
+    }
+    .grid-cell {
+      border: 1px dashed #e2d7f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      transition: background-color 0.2s;
+    }
+    .grid-cell:hover {
+      background-color: #f2ebfd;
+    }
+    .placed-item {
+      font-size: 28px;
+      position: absolute;
+      cursor: move;
+      user-select: none;
+      z-index: 10;
+      transform-origin: center;
+      transition: transform 0.2s;
+    }
+    .placed-item:hover {
+      transform: scale(1.1);
+      z-index: 15;
+    }
+    .rainbow-border {
+      position: absolute;
+      width: 408px;
+      height: 408px;
+      top: -4px;
+      left: -4px;
+      border-radius: 16px;
+      background: linear-gradient(45deg, 
+        #ffadcf, #b19cd9, #aed9e6, #b5e5ce, 
+        #ffeaaa, #ffadcf, #b19cd9);
+      background-size: 400% 400%;
+      z-index: -1;
+      animation: rainbow 8s ease infinite;
+    }
+    @keyframes rainbow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .sparkle {
+      position: absolute;
+      font-size: 12px;
+      pointer-events: none;
+      animation: sparkle-anim 1s forwards;
+      z-index: 20;
+    }
+    @keyframes sparkle-anim {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+    .layout-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 8;
+    }
+    .controls {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 8px 15px;
+      background-color: #c8b6e2;
+      border: none;
+      border-radius: 20px;
+      color: #6d5895;
+      cursor: pointer;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      font-size: 14px;
+      transition: all 0.2s;
+      box-shadow: 0 3px 5px rgba(109, 88, 149, 0.2);
+    }
+    button:hover {
+      background-color: #b19cd9;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 8px rgba(109, 88, 149, 0.3);
+    }
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 3px rgba(109, 88, 149, 0.3);
+    }
+    .color-palette {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .color-option {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s;
+      border: 2px solid white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .color-option:hover {
+      transform: scale(1.2);
+    }
+    
+    @media (max-height: 600px) {
+      .design-grid-container {
+        width: 300px;
+        height: 300px;
+      }
+      .design-grid {
+        width: 300px;
+        height: 300px;
+      }
+      .emoji-item {
+        font-size: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-    <div id="maze-container"></div>
-    <div id="message"></div>
-    <div id="controls">
-        <button id="start-button">Start Game</button>
-        <button id="reset-button">Reset Maze</button>
+  <div class="sidebar sidebar-left">
+    <div class="sidebar-title">🪑 Furniture</div>
+    
+    <div class="sidebar-section">
+      <div class="section-title">Seating</div>
+      <div class="emoji-grid">
+        <div class="emoji-item" draggable="true" data-type="furniture">🛋️</div>
+        <div class="emoji-tooltip">Sofa</div>
+        <div class="emoji-item" draggable="true" data-type="furniture">🪑</div>
+        <div class="emoji-tooltip">Chair</div>
+        <div class="emoji-item" draggable="true" data-type="furniture">🧸</div>
+        <div class="emoji-tooltip">Bean Bag</div>
+        <div class="emoji-item" draggable="true" data-type="furniture">⭐</div>
+        <div class="emoji-tooltip">Floor Pillow</div>
+      </div>
     </div>
+    
+    <div class="sidebar-section">
+      <div class="section-title">Tables</div>
+      <div class="emoji-grid">
+        <div class="emoji-item" draggable="true" data-type="furniture">🪵</div>
+        <div class="emoji-tooltip">Coffee Table</div>
+        <div class="emoji-item" draggable="true" data-type="furniture">🎮</div>
+        <div class="emoji-tooltip">Gaming Table</div>
+        <div class="emoji-item" draggable="true" data-type="furniture">🍽️</div>
+        <div class="emoji-tooltip">Dining Table</div>
+        <div class="emoji-item" draggable="true" data-type="furniture">🧩</div>
+        <div class="emoji-tooltip">Side Table</div>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="section-title">Storage</div>
+      <div class="emoji-grid">
+        <div class="emoji-item" draggable="true" data-type="furniture">📚</div>
+        <div class="emoji-tooltip">Bookshelf</div>
+        <div class="emoji-item" draggable="true" data-type="furniture">🗄️</div>
+        <div class="emoji-tooltip">Cabinet</div>
+        <div class="emoji-item" draggable="true" data-type="furniture">📦</div>
+        <div class="emoji-tooltip">Storage Box</div>
+        <div class="emoji-item" draggable="true" data-type="furniture">🧺</div>
+        <div class="emoji-tooltip">Basket</div>
+      </div>
+    </div>
+    
+    <!-- New Structure Section -->
+    <div class="sidebar-section">
+      <div class="section-title">Structure</div>
+      <div class="emoji-grid">
+        <div class="emoji-item" draggable="true" data-type="structure">🚪</div>
+        <div class="emoji-tooltip">Door</div>
+        <div class="emoji-item" draggable="true" data-type="structure">🧱</div>
+        <div class="emoji-tooltip">Wall</div>
+        <div class="emoji-item" draggable="true" data-type="structure">🪟</div>
+        <div class="emoji-tooltip">Window</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="main-area">
+    <div class="header">
+      <h1 class="title">✨ Emoji Home Designer ✨</h1>
+      <p class="subtitle">Drag & drop items to design your room!</p>
+      
+      <!-- Layout Options -->
+      <div class="layout-options">
+        <label for="layoutSelect">Layout Options:</label>
+        <select id="layoutSelect">
+          <option value="studio">Studio</option>
+          <option value="two-room">Two Room</option>
+          <option value="three-room">Three Room</option>
+          <option value="l-shaped">L-Shaped</option>
+        </select>
+        <button id="applyLayoutBtn">Apply</button>
+      </div>
+      
+      <div class="color-palette">
+        <div class="color-option" style="background-color: #ffeaaa;" data-color="#ffeaaa"></div>
+        <div class="color-option" style="background-color: #b5e5ce;" data-color="#b5e5ce"></div>
+        <div class="color-option" style="background-color: #aed9e6;" data-color="#aed9e6"></div>
+        <div class="color-option" style="background-color: #ffadcf;" data-color="#ffadcf"></div>
+        <div class="color-option" style="background-color: #e9e1fa;" data-color="#e9e1fa"></div>
+        <div class="color-option" style="background-color: white;" data-color="white"></div>
+      </div>
+    </div>
+    
+    <div class="design-grid-container">
+      <div class="rainbow-border"></div>
+      <!-- Layout overlay for room divisions -->
+      <div id="layoutOverlay" class="layout-overlay"></div>
+      <div class="design-grid" id="designGrid"></div>
+    </div>
+    
+    <div class="controls">
+      <button id="clearBtn">✨ Clear All</button>
+      <button id="randomizeBtn">🎲 Randomize</button>
+      <button id="saveBtn">💾 Save Design</button>
+    </div>
+  </div>
+  
+  <div class="sidebar sidebar-right">
+    <div class="sidebar-title">🏠 Decor</div>
+    
+    <div class="sidebar-section">
+      <div class="section-title">Plants</div>
+      <div class="emoji-grid">
+        <div class="emoji-item" draggable="true" data-type="decor">🌵</div>
+        <div class="emoji-tooltip">Cactus</div>
+        <div class="emoji-item" draggable="true" data-type="decor">🌱</div>
+        <div class="emoji-tooltip">Small Plant</div>
+        <div class="emoji-item" draggable="true" data-type="decor">🌲</div>
+        <div class="emoji-tooltip">Large Plant</div>
+        <div class="emoji-item" draggable="true" data-type="decor">🌸</div>
+        <div class="emoji-tooltip">Flower</div>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="section-title">Lighting</div>
+      <div class="emoji-grid">
+        <div class="emoji-item" draggable="true" data-type="decor">💡</div>
+        <div class="emoji-tooltip">Lamp</div>
+        <div class="emoji-item" draggable="true" data-type="decor">🕯️</div>
+        <div class="emoji-tooltip">Candle</div>
+        <div class="emoji-item" draggable="true" data-type="decor">✨</div>
+        <div class="emoji-tooltip">String Lights</div>
+        <div class="emoji-item" draggable="true" data-type="decor">🔆</div>
+        <div class="emoji-tooltip">Floor Lamp</div>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="section-title">Accessories</div>
+      <div class="emoji-grid">
+        <div class="emoji-item" draggable="true" data-type="decor">🖼️</div>
+        <div class="emoji-tooltip">Art</div>
+        <div class="emoji-item" draggable="true" data-type="decor">📱</div>
+        <div class="emoji-tooltip">Tech</div>
+        <div class="emoji-item" draggable="true" data-type="decor">🧶</div>
+        <div class="emoji-tooltip">Throw</div>
+        <div class="emoji-item" draggable="true" data-type="decor">🎁</div>
+        <div class="emoji-tooltip">Decor Box</div>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="section-title">Pets</div>
+      <div class="emoji-grid">
+        <div class="emoji-item" draggable="true" data-type="pet">🐈</div>
+        <div class="emoji-tooltip">Cat</div>
+        <div class="emoji-item" draggable="true" data-type="pet">🐕</div>
+        <div class="emoji-tooltip">Dog</div>
+        <div class="emoji-item" draggable="true" data-type="pet">🐠</div>
+        <div class="emoji-tooltip">Fish</div>
+        <div class="emoji-item" draggable="true" data-type="pet">🐇</div>
+        <div class="emoji-tooltip">Bunny</div>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        const mazeContainer = document.getElementById('maze-container');
-        const startButton = document.getElementById('start-button');
-        const resetButton = document.getElementById('reset-button');
-        const messageDiv = document.getElementById('message');
-        let playerRow, playerCol;
-        let maze;
-        let endRow, endCol;
-        let gameStarted = false; // Flag to control game state
-
-        function generateMaze(rows, cols) {
-           const grid = Array(rows).fill(null).map(() => Array(cols).fill(null).map(() => ({
-                top: true, right: true, bottom: true, left: true, visited: false
-            })));
-
-            function carvePath(row, col) {
-                grid[row][col].visited = true;
-                const directions = [
-                    { dr: -1, dc: 0, wall: 'top', opposite: 'bottom' },
-                    { dr: 0, dc: 1, wall: 'right', opposite: 'left' },
-                    { dr: 1, dc: 0, wall: 'bottom', opposite: 'top' },
-                    { dr: 0, dc: -1, wall: 'left', opposite: 'right' }
-                ];
-                directions.sort(() => Math.random() - 0.5);
-
-                for (const dir of directions) {
-                    const newRow = row + dir.dr;
-                    const newCol = col + dir.dc;
-                    if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && !grid[newRow][newCol].visited) {
-                        grid[row][col][dir.wall] = false;
-                        grid[newRow][newCol][dir.opposite] = false;
-                        carvePath(newRow, newCol);
-                    }
-                }
-            }
-            carvePath(0, 0);
-            return grid;
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const designGrid = document.getElementById('designGrid');
+      const clearBtn = document.getElementById('clearBtn');
+      const randomizeBtn = document.getElementById('randomizeBtn');
+      const saveBtn = document.getElementById('saveBtn');
+      const colorOptions = document.querySelectorAll('.color-option');
+      const layoutOverlay = document.getElementById('layoutOverlay');
+      const layoutSelect = document.getElementById('layoutSelect');
+      const applyLayoutBtn = document.getElementById('applyLayoutBtn');
+      
+      let currentBgColor = 'white';
+      let placedItems = [];
+      let nextId = 1;
+      let isDragging = false;
+      let draggedItem = null;
+      let offsetX, offsetY;
+      
+      // Create grid cells
+      for (let i = 0; i < 100; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';
+        cell.dataset.index = i;
+        designGrid.appendChild(cell);
+      }
+      
+      // Set up draggable items
+      const emojiItems = document.querySelectorAll('.emoji-item');
+      emojiItems.forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+          e.dataTransfer.setData('text/plain', JSON.stringify({
+            emoji: this.textContent,
+            type: this.dataset.type
+          }));
+        });
+        
+        // Mobile/touch support
+        item.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          const touch = e.touches[0];
+          const emoji = this.textContent;
+          const type = this.dataset.type;
+          createDraggedElement(emoji, type, touch.clientX, touch.clientY);
+          createSparkle(touch.clientX, touch.clientY);
+        });
+      });
+      
+      // Handle dropping on the grid
+      designGrid.addEventListener('dragover', function(e) {
+        e.preventDefault();
+      });
+      
+      designGrid.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        const rect = designGrid.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        placeItem(data.emoji, data.type, x, y);
+        createSparkle(e.clientX, e.clientY);
+      });
+      
+      // Mouse events for moving placed items
+      designGrid.addEventListener('mousedown', function(e) {
+        const target = e.target;
+        if (target.classList.contains('placed-item')) {
+          isDragging = true;
+          draggedItem = target;
+          const rect = target.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+          target.style.zIndex = "100";
+          target.style.cursor = "grabbing";
+          createSparkle(e.clientX, e.clientY);
         }
-
-        function renderMaze(maze) {
-            mazeContainer.innerHTML = '';
-            for (let row = 0; row < maze.length; row++) {
-                for (let col = 0; col < maze[row].length; col++) {
-                    const cell = maze[row][col];
-                    const cellDiv = document.createElement('div');
-                    cellDiv.classList.add('cell');
-                    cellDiv.dataset.row = row;
-                    cellDiv.dataset.col = col;
-                    if (cell.top) cellDiv.classList.add('wall-top');
-                    if (cell.right) cellDiv.classList.add('wall-right');
-                    if (cell.bottom) cellDiv.classList.add('wall-bottom');
-                    if (cell.left) cellDiv.classList.add('wall-left');
-                    mazeContainer.appendChild(cellDiv);
-                }
-            }
-            createPlayer(); // Create player after maze is rendered
-            createEnd();
+      });
+      
+      document.addEventListener('mousemove', function(e) {
+        if (isDragging && draggedItem) {
+          const rect = designGrid.getBoundingClientRect();
+          const x = e.clientX - rect.left - offsetX;
+          const y = e.clientY - rect.top - offsetY;
+          const boundedX = Math.max(0, Math.min(rect.width - 40, x));
+          const boundedY = Math.max(0, Math.min(rect.height - 40, y));
+          draggedItem.style.left = boundedX + 'px';
+          draggedItem.style.top = boundedY + 'px';
         }
-
-        function createPlayer() {
-            const playerDiv = document.createElement('div');
-            playerDiv.classList.add('player');
-            mazeContainer.appendChild(playerDiv);
-            playerRow = 0;
-            playerCol = 0;
-            updatePlayerPosition();
+      });
+      
+      document.addEventListener('mouseup', function() {
+        if (isDragging && draggedItem) {
+          isDragging = false;
+          draggedItem.style.cursor = "move";
+          draggedItem.style.zIndex = "10";
+          draggedItem = null;
         }
-        function createEnd() {
-            endRow = maze.length - 1;
-            endCol = maze[0].length - 1;
-            const endCell = document.querySelector(`.cell[data-row="${endRow}"][data-col="${endCol}"]`);
-            endCell.classList.add("end");
+      });
+      
+      // Touch events for mobile dragging
+      designGrid.addEventListener('touchmove', function(e) {
+        if (isDragging && draggedItem) {
+          e.preventDefault();
+          const touch = e.touches[0];
+          const rect = designGrid.getBoundingClientRect();
+          const x = touch.clientX - rect.left - offsetX;
+          const y = touch.clientY - rect.top - offsetY;
+          const boundedX = Math.max(0, Math.min(rect.width - 40, x));
+          const boundedY = Math.max(0, Math.min(rect.height - 40, y));
+          draggedItem.style.left = boundedX + 'px';
+          draggedItem.style.top = boundedY + 'px';
         }
-
-
-        function updatePlayerPosition() {
-            const playerDiv = document.querySelector('.player');
-            const cellWidth = 30;
-            const cellHeight = 30;
-            playerDiv.style.transform = `translate(${playerCol * cellWidth}px, ${playerRow * cellHeight}px)`;
-             document.querySelector(`.cell[data-row="${playerRow}"][data-col="${playerCol}"]`).classList.add("visited");
-
+      });
+      
+      designGrid.addEventListener('touchend', function() {
+        if (isDragging && draggedItem) {
+          isDragging = false;
+          draggedItem.style.cursor = "move";
+          draggedItem.style.zIndex = "10";
+          draggedItem = null;
         }
-
-
-       function handleKeyPress(event) {
-            if (!gameStarted) return; // Ignore input if game hasn't started
-
-            let newRow = playerRow;
-            let newCol = playerCol;
-            let moved = false;
-
-            switch (event.key) {
-                case 'ArrowUp':
-                    if (!maze[playerRow][playerCol].top) { newRow--; moved = true; } break;
-                case 'ArrowDown':
-                    if (!maze[playerRow][playerCol].bottom) { newRow++; moved = true; } break;
-                case 'ArrowLeft':
-                    if (!maze[playerRow][playerCol].left) { newCol--; moved = true; } break;
-                case 'ArrowRight':
-                    if (!maze[playerRow][playerCol].right) { newCol++; moved = true; } break;
-            }
-
-            if (moved) {
-                playerRow = newRow;
-                playerCol = newCol;
-                updatePlayerPosition();
-                if (playerRow === endRow && playerCol === endCol) {
-                    endGame(true); // Win condition
-                }
-            }
+      });
+      
+      // Mobile touch drag from palette to grid
+      function createDraggedElement(emoji, type, clientX, clientY) {
+        isDragging = true;
+        const newItem = document.createElement('div');
+        newItem.className = 'placed-item';
+        newItem.textContent = emoji;
+        newItem.dataset.type = type;
+        newItem.id = 'temp-drag-item';
+        document.body.appendChild(newItem);
+        draggedItem = newItem;
+        const rect = newItem.getBoundingClientRect();
+        offsetX = rect.width / 2;
+        offsetY = rect.height / 2;
+        newItem.style.position = 'absolute';
+        newItem.style.left = (clientX - offsetX) + 'px';
+        newItem.style.top = (clientY - offsetY) + 'px';
+        newItem.style.zIndex = "1000";
+        document.addEventListener('touchmove', handleTouchMove);
+        document.addEventListener('touchend', handleTouchEnd);
+      }
+      
+      function handleTouchMove(e) {
+        if (isDragging && draggedItem) {
+          e.preventDefault();
+          const touch = e.touches[0];
+          draggedItem.style.left = (touch.clientX - offsetX) + 'px';
+          draggedItem.style.top = (touch.clientY - offsetY) + 'px';
         }
-
-        function showWinMessage() {
-            messageDiv.textContent = "Congratulations! You solved the maze!";
-            messageDiv.style.display = "block";
+      }
+      
+      function handleTouchEnd(e) {
+        if (isDragging && draggedItem) {
+          const touch = e.changedTouches[0];
+          const gridRect = designGrid.getBoundingClientRect();
+          if (
+            touch.clientX >= gridRect.left &&
+            touch.clientX <= gridRect.right &&
+            touch.clientY >= gridRect.top &&
+            touch.clientY <= gridRect.bottom
+          ) {
+            const x = touch.clientX - gridRect.left;
+            const y = touch.clientY - gridRect.top;
+            placeItem(draggedItem.textContent, draggedItem.dataset.type, x, y);
+            createSparkle(touch.clientX, touch.clientY);
+          }
+          if (draggedItem.id === 'temp-drag-item') {
+            draggedItem.remove();
+          }
+          isDragging = false;
+          draggedItem = null;
+          document.removeEventListener('touchmove', handleTouchMove);
+          document.removeEventListener('touchend', handleTouchEnd);
         }
-
-         function startGame() {
-            if (!gameStarted) { // Prevent starting multiple games
-                gameStarted = true;
-                maze = generateMaze(10, 10);
-                renderMaze(maze);
-                messageDiv.style.display = 'none';
-                document.addEventListener('keydown', handleKeyPress); // Attach listener here
-            }
+      }
+      
+      // Place an item on the grid
+      function placeItem(emoji, type, x, y) {
+        const item = document.createElement('div');
+        item.className = 'placed-item';
+        item.textContent = emoji;
+        item.dataset.type = type;
+        item.dataset.id = nextId++;
+        item.style.left = (x - 20) + 'px';
+        item.style.top = (y - 20) + 'px';
+        designGrid.appendChild(item);
+        placedItems.push(item);
+      }
+      
+      // Create sparkle effect
+      function createSparkle(x, y) {
+        const sparkles = ['✨', '⭐', '💫', '🌟'];
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
+        sparkle.style.left = (x - 10) + 'px';
+        sparkle.style.top = (y - 10) + 'px';
+        document.body.appendChild(sparkle);
+        setTimeout(() => {
+          sparkle.remove();
+        }, 1000);
+      }
+      
+      // Background color change
+      colorOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          currentBgColor = this.dataset.color;
+          designGrid.style.backgroundColor = currentBgColor;
+          const rect = this.getBoundingClientRect();
+          createSparkle(rect.left + rect.width/2, rect.top + rect.height/2);
+        });
+      });
+      
+      // Clear button
+      clearBtn.addEventListener('click', function() {
+        placedItems.forEach(item => item.remove());
+        placedItems = [];
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => {
+            const x = Math.random() * designGrid.offsetWidth + designGrid.getBoundingClientRect().left;
+            const y = Math.random() * designGrid.offsetHeight + designGrid.getBoundingClientRect().top;
+            createSparkle(x, y);
+          }, i * 100);
         }
-
-        function endGame(won) {
-            gameStarted = false;
-            document.removeEventListener('keydown', handleKeyPress); // Remove key listener
-
-            if (won) {
-                showWinMessage();
-            } else {
-                 messageDiv.textContent = "Game Reset!";
-                 messageDiv.style.display = "block";
-            }
+      });
+      
+      // Randomize button
+      randomizeBtn.addEventListener('click', function() {
+        placedItems.forEach(item => item.remove());
+        placedItems = [];
+        const colors = ['#ffeaaa', '#b5e5ce', '#aed9e6', '#ffadcf', '#e9e1fa', 'white'];
+        currentBgColor = colors[Math.floor(Math.random() * colors.length)];
+        designGrid.style.backgroundColor = currentBgColor;
+        const emojis = Array.from(emojiItems).map(item => ({
+          emoji: item.textContent,
+          type: item.dataset.type
+        }));
+        const numItems = 5 + Math.floor(Math.random() * 8);
+        for (let i = 0; i < numItems; i++) {
+          const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+          const x = Math.random() * (designGrid.offsetWidth - 40) + 20;
+          const y = Math.random() * (designGrid.offsetHeight - 40) + 20;
+          setTimeout(() => {
+            placeItem(randomEmoji.emoji, randomEmoji.type, x, y);
+            const gridRect = designGrid.getBoundingClientRect();
+            createSparkle(x + gridRect.left, y + gridRect.top);
+          }, i * 100);
         }
-
-
-        function resetGame(){
-             endGame(false); // End the current game without a win
-            //startGame(); // Don't auto-start, let the user click "Start" again
+      });
+      
+      // Save button (simulated)
+      saveBtn.addEventListener('click', function() {
+        const message = document.createElement('div');
+        message.textContent = '✨ Design saved! ✨';
+        message.style.position = 'absolute';
+        message.style.top = '50%';
+        message.style.left = '50%';
+        message.style.transform = 'translate(-50%, -50%)';
+        message.style.backgroundColor = '#d8cef6';
+        message.style.color = '#6d5895';
+        message.style.padding = '15px 30px';
+        message.style.borderRadius = '30px';
+        message.style.fontWeight = 'bold';
+        message.style.zIndex = '1000';
+        message.style.boxShadow = '0 5px 15px rgba(109, 88, 149, 0.3)';
+        document.body.appendChild(message);
+        for (let i = 0; i < 20; i++) {
+          setTimeout(() => {
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            createSparkle(x, y);
+          }, i * 50);
         }
-
-
-        startButton.addEventListener('click', startGame);
-        resetButton.addEventListener('click', resetGame);
-
-    </script>
+        setTimeout(() => {
+          message.remove();
+        }, 2000);
+      });
+      
+      // Layout Options: update room divisions on the grid
+      function updateLayout() {
+        const layout = layoutSelect.value;
+        layoutOverlay.innerHTML = "";
+        const overlayWidth = designGrid.offsetWidth;
+        const overlayHeight = designGrid.offsetHeight;
+        if(layout === "two-room") {
+          // Vertical divider at 50%
+          const line = document.createElement('div');
+          line.style.position = 'absolute';
+          line.style.left = (overlayWidth / 2 - 2) + 'px';
+          line.style.top = '0';
+          line.style.width = '4px';
+          line.style.height = '100%';
+          line.style.borderLeft = '2px dashed #b19cd9';
+          line.style.borderRight = '2px dashed #b19cd9';
+          layoutOverlay.appendChild(line);
+        } else if(layout === "three-room") {
+          // Two vertical dividers
+          [1, 2].forEach(i => {
+            const line = document.createElement('div');
+            line.style.position = 'absolute';
+            line.style.left = ((overlayWidth / 3) * i - 2) + 'px';
+            line.style.top = '0';
+            line.style.width = '4px';
+            line.style.height = '100%';
+            line.style.borderLeft = '2px dashed #b19cd9';
+            line.style.borderRight = '2px dashed #b19cd9';
+            layoutOverlay.appendChild(line);
+          });
+        } else if(layout === "l-shaped") {
+          // Vertical line at 60% and horizontal line on the right half at 50%
+          const verticalLine = document.createElement('div');
+          verticalLine.style.position = 'absolute';
+          verticalLine.style.left = (overlayWidth * 0.6 - 2) + 'px';
+          verticalLine.style.top = '0';
+          verticalLine.style.width = '4px';
+          verticalLine.style.height = '100%';
+          verticalLine.style.borderLeft = '2px dashed #b19cd9';
+          verticalLine.style.borderRight = '2px dashed #b19cd9';
+          layoutOverlay.appendChild(verticalLine);
+          const horizontalLine = document.createElement('div');
+          horizontalLine.style.position = 'absolute';
+          horizontalLine.style.left = (overlayWidth * 0.6) + 'px';
+          horizontalLine.style.top = (overlayHeight / 2 - 2) + 'px';
+          horizontalLine.style.width = (overlayWidth * 0.4) + 'px';
+          horizontalLine.style.height = '4px';
+          horizontalLine.style.borderTop = '2px dashed #b19cd9';
+          horizontalLine.style.borderBottom = '2px dashed #b19cd9';
+          layoutOverlay.appendChild(horizontalLine);
+        }
+        // For 'studio', no division is drawn.
+      }
+      
+      applyLayoutBtn.addEventListener('click', updateLayout);
+    });
+  </script>
 </body>
 </html>
